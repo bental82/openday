@@ -5,7 +5,9 @@
 האפליקציה **עצמאית לחלוטין** — ללא תלות ב-Base44. היא מורכבת מ:
 
 - **פרונטאנד**: React + Vite (תיקיית `src/`)
-- **שרת API**: Express + googleapis (תיקיית `server/`) — ניגש ל-Google Sheets באמצעות Service Account
+- **לוגיקת עיבוד משותפת**: `server/processMeetings.js` — ניגשת ל-Google Sheets באמצעות Service Account
+- **שרת מקומי**: Express (`server/index.js`) — לפיתוח ולאירוח עצמי
+- **Vercel**: אותה לוגיקה כ-Serverless Function (`api/process-meetings.js`)
 
 ## דרישות מקדימות
 
@@ -46,7 +48,17 @@ npm run dev
 
 הפקודה מריצה במקביל את שרת ה-API (פורט 3001) ואת Vite (פורט 5173). גשו ל-http://localhost:5173.
 
-## הרצה בפרודקשן
+## פריסה ב-Vercel (מומלץ)
+
+1. ב-[Vercel](https://vercel.com) בחרו **Add New → Project** וייבאו את הריפו מ-GitHub. Vercel מזהה את Vite אוטומטית — אין צורך לשנות הגדרות build.
+2. לפני ה-Deploy (או אחריו, תחת Settings → Environment Variables) הוסיפו משתנה סביבה:
+   - **Key**: `GOOGLE_SERVICE_ACCOUNT_KEY`
+   - **Value**: כל תוכן קובץ ה-JSON של ה-Service Account, מודבק כמו שהוא
+   - סמנו אותו כ-**Sensitive**
+3. אופציונלי: `SPREADSHEET_ID`, `MAIN_WORKSHEET_NAME`, `LIST_WORKSHEET_NAME`, `NEW_WORKSHEET_NAME` (יש ברירות מחדל).
+4. Deploy. ה-API רץ כ-Serverless Function תחת `/api/process-meetings` והפרונטאנד מוגש סטטית.
+
+## הרצה בפרודקשן (אירוח עצמי)
 
 ```bash
 npm install
