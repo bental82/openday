@@ -1,6 +1,7 @@
 #env
 .env
 .env.*
+!.env.example
 
 # Logs
 logs
@@ -28,3 +29,6 @@ dist-ssr
 *.sw?
 
 .env
+# Google service account keys
+google-service-account*.json
+*service-account*.json

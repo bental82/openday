@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -16,15 +15,18 @@ export default function ProcessMeetings() {
         setResult(null);
 
         try {
-            const response = await base44.functions.invoke('processGoogleSheets', {});
-            
-            if (response.data.error) {
-                setError(response.data.error);
+            const response = await fetch('/api/process-meetings', { method: 'POST' });
+            // The response may not be JSON when the API server is unreachable
+            // (dev proxy error, reverse-proxy 502 page)
+            const data = await response.json().catch(() => null);
+
+            if (!response.ok || !data || data.error) {
+                setError(data?.error || `שגיאה בעיבוד הנתונים (HTTP ${response.status})`);
             } else {
-                setResult(response.data);
+                setResult(data);
             }
         } catch (err) {
-            setError(err.response?.data?.error || err.message || 'שגיאה בעיבוד הנתונים');
+            setError(err.message || 'שגיאה בעיבוד הנתונים');
         } finally {
             setLoading(false);
         }

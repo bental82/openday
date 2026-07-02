@@ -1,39 +1,67 @@
-**Welcome to your Base44 project** 
+# Meeting Manager — עיבוד פגישות
 
-**About**
+אפליקציה לעיבוד נתוני פגישות מ-Google Sheets: קוראת נתונים מהגיליונות `Sheet1` ו-`list`, מחלצת תאריכים, טלפונים, יועצים וסוגי פגישות, מנרמלת חוגים לפי מיפוי, וכותבת את התוצאה לגיליון `new`.
 
-View and Edit  your app on [Base44.com](http://Base44.com) 
+האפליקציה **עצמאית לחלוטין** — ללא תלות ב-Base44. היא מורכבת מ:
 
-This project contains everything you need to run your app locally.
+- **פרונטאנד**: React + Vite (תיקיית `src/`)
+- **שרת API**: Express + googleapis (תיקיית `server/`) — ניגש ל-Google Sheets באמצעות Service Account
 
-**Edit the code in your local development environment**
+## דרישות מקדימות
 
-Any change pushed to the repo will also be reflected in the Base44 Builder.
+- Node.js 20 ומעלה
+- חשבון Google Cloud עם גישה לגיליון
 
-**Prerequisites:** 
+## חיבור ל-Google Sheets (חד־פעמי)
 
-1. Clone the repository using the project's Git URL 
-2. Navigate to the project directory
-3. Install dependencies: `npm install`
-4. Create an `.env.local` file and set the right environment variables
+1. היכנסו ל-[Google Cloud Console](https://console.cloud.google.com/) וצרו פרויקט (או בחרו קיים).
+2. הפעילו את **Google Sheets API**: APIs & Services → Library → חפשו "Google Sheets API" → Enable.
+3. צרו **Service Account**: APIs & Services → Credentials → Create Credentials → Service account. אין צורך בהרשאות (Roles) מיוחדות.
+4. צרו מפתח: בתוך ה-Service Account → Keys → Add Key → Create new key → JSON. שמרו את הקובץ.
+5. **שתפו את הגיליון** עם כתובת המייל של ה-Service Account (מופיעה בשדה `client_email` בקובץ ה-JSON, למשל `xxx@yyy.iam.gserviceaccount.com`) עם הרשאת **Editor**.
+
+## הגדרת סביבה
+
+צרו קובץ `.env` בתיקיית הפרויקט (ראו `.env.example`):
 
 ```
-VITE_BASE44_APP_ID=your_app_id
-VITE_BASE44_APP_BASE_URL=your_backend_url
+# אחת משתי האפשרויות:
+GOOGLE_APPLICATION_CREDENTIALS=./google-service-account.json
+# או:
+# GOOGLE_SERVICE_ACCOUNT_KEY={"type":"service_account",...}
 
-e.g.
-VITE_BASE44_APP_ID=cbef744a8545c389ef439ea6
-VITE_BASE44_APP_BASE_URL=https://my-to-do-list-81bfaad7.base44.app
+# אופציונלי (יש ברירות מחדל):
+# SPREADSHEET_ID=1Vv0wwcWg9buz6myZHvH3BRORszKVPvtvA-_iHn-SVB0
+# PORT=3001
 ```
 
-Run the app: `npm run dev`
+> קבצי `.env` ומפתחות JSON לא נכנסים ל-git (מוחרגים ב-`.gitignore`). אל תעלו אותם לריפו.
 
-**Publish your changes**
+## הרצה מקומית (פיתוח)
 
-Open [Base44.com](http://Base44.com) and click on Publish.
+```bash
+npm install
+npm run dev
+```
 
-**Docs & Support**
+הפקודה מריצה במקביל את שרת ה-API (פורט 3001) ואת Vite (פורט 5173). גשו ל-http://localhost:5173.
 
-Documentation: [https://docs.base44.com/Integrations/Using-GitHub](https://docs.base44.com/Integrations/Using-GitHub)
+## הרצה בפרודקשן
 
-Support: [https://app.base44.com/support](https://app.base44.com/support)
+```bash
+npm install
+npm run build
+npm start
+```
+
+השרת מגיש גם את ה-API וגם את הפרונטאנד הבנוי מ-`dist/` על פורט 3001 (או `PORT`).
+
+## שימו לב — אין אימות משתמשים
+
+לאחר הניתוק מ-Base44 הוסר גם מנגנון ההתחברות. כל מי שיש לו גישה לכתובת האפליקציה יכול להפעיל את העיבוד. אם מפרסמים את האפליקציה לאינטרנט, מומלץ להגן עליה (למשל Basic Auth בשרת, Cloudflare Access, או הרצה ברשת פנימית בלבד).
+
+## API
+
+| Method | Path | תיאור |
+|--------|------|-------|
+| POST | `/api/process-meetings` | מריץ את עיבוד הגיליון ומחזיר סטטיסטיקות |
